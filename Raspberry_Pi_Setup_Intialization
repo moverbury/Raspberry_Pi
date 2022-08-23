@@ -119,17 +119,19 @@ SSH -   In your terminal - the default Pi username is "pi" and the password you 
         # You should now see "root@raspberrypi:~# in the command line
         And with that we then update the iptables.
 
-Updating IP Tables in Terminal. K3S is going to need the iptables so we need to update them:
-	Type "sudo iptables -F"
+Updating IP Tables in Terminal. 
+
+Raspberry Pi OS defaults to using nftables instead of iptables.
+K3S networking features require iptables and won't function with nftables. Follow these steps to configure things to use iptables:
+
 	You can copy the following and paste it into your terminal/CMD
-	
-bin/iptable-legacy
-sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacyroot@raspberrypi:~# sudo update-alternatives --set iptables /usr/sbin/iptables-legacy update-alternatives: using /usr/sbin/iptables-legacy to provide /usr/sbin/iptables (iptables) in manual mode
-root@raspberrypi:~# sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-update-alternatives: using /usr/sbin/ip6tables-legacy to provide /usr/sbin/ip6tables (ip6tables) in manual mode
-	
-Then type "reboot" to reboot your headless Pi machine
-	# You're done configuring your headless Pi! 
+
+sudo iptables -F	
+sudo update-alternatives --set iptables /usr/sbin/iptables-legacy 
+sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+sudo reboot
+
+# You're done configuring your headless Pi! 
 	
 Now it's time to install Kubernetes (K3S) on your headless Pi
 	We need to set up the MASTER first.
