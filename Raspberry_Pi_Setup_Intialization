@@ -14,22 +14,31 @@ Minimum Requirements:
 	A name for you new headless Pi
 	Your network interface value (eth0 or equivalent)
 	Ethernet connection to your network
+	Download and install the Raspberry Pi Imager from their official website.
 
 Prepare the SD Card by putting the Raspian Image onto your SD Card
     Slide the SD Card into the back slot of the Micro SD USB Adapter
     Plug into your computer
     Go to  https://www.raspberrypi.com/software/operating-systems/
     Download, then Install the Raspberry Pi Imager for your operating system
-    # You might need to go into your applications to double click the big raspberry imager after it's downloaded
-    Select: Raspberry Pi OS Lite 32 BIT version
-    Hit Ctl Shift X and select SSH
+    # You might need to go into your applications to double click the big raspberry image after it's downloaded and installed
+    Select: Other
+    Select Raspberry Pi OS Lite 32 BIT version (A port of Debian Bullseye with no desktop environment)
+    
+    Hit Ctl Shift X and 
+    Select SSH
     Change user name if you want from pi and create your password
+    Select Save
     # This is SUPER Important - Raspberry Pi's manufactured after April 2022 no longer have a default password for SSH
     # You MUST set your credentials HERE to get in later using the password you established here.
-    Select Storage (make sure you write the image to your 
+    Select Choose Storage (make sure you write the image to your USB and NOT some other equipment you'll never get back....)
     Save the image to your 32GB Micro SD Card
     Hit Write
-    Wait until complete, then
+    Wait (a few minutes) until complete.
+    Allow the system to verify the Write, 
+    # The first Writes didn't get properly verified! Yikes. 
+    # Just re-write it and have it re-verified
+    then
     
     Remove the USB Adapter from your computer
     Remove the SD Card from the USB Adapter
@@ -39,36 +48,35 @@ Prepare the SD Card by putting the Raspian Image onto your SD Card
     # Flashing intermittently green light is GOOD
     # One or just two blinks means there's a problem. We'll deal with that later.
 
-After a few minutes waiting for the Pi to boot itself up, the green light will display a few flashes now and again
+After a few minutes waiting for the Pi to boot itself up, the green light will not light up with intermitent flashes
     Go ahead and unplug power from the Pi
     Remove the SD Card from the Pi
     Insert it BACK in the USB Adapter
     And plug the USB Adapter BACK into your computer.
-    Search on your computer file manager forBoot(I:) (which is your Eye Drive right??)
+    Search on your computer file manager for Boot(I:) (which is your Eye Drive right??)
 
-All this is doing is creating a Boot Folder on the Drive
-And now we need to modify a few of those files to prepare the Pi for a Headless life of Adventure!
+# All this is doing is creating a Boot Folder on the Drive
+# And now we need to modify a few of those files to prepare the Pi for a Headless life of Adventure!
 
-Open up the Boot folder 
+Open up the Boot folder in your files folder
 	Find the cmdline.txt file and click on it in your text editor
 	And here you'll see a big long line of text 
-	Go to the very end and
-            # after rootwait
+	Go to the very end after rootwait
             type in 
             "cgroup_memory=1 cgroup_enable=memory ip=xx.x.x.xx::xx.x.x.xx:255.255.255.0:newPIname:eth0:off"
             Type ctl_s to save this code to the file
             # where 
-            the first IP address is A) on your subnet and B) isn't used AND
-            after the :: the ip address of the default gateway of your network AND
-            whatever your subnet mask is for your network AND
-            Here you name your headless Pi AND
-            Add your interface (NIC) AND
-            Off being to turn off auto configuration
+            # the first IP address is A) on your subnet and B) isn't used AND
+            # after the :: the ip address of the default gateway of your network AND
+            # whatever your subnet mask is for your network AND
+            # Here you name your headless Pi AND
+            # Add your interface (NIC) AND
+            # Off being to turn off auto configuration
             
         NEXT: Find the config.txt file
         Open it in your text editor of choice
         Scroll down to the very end of the file
-        Type the following on a new line
+        Type the following on a new line after arm_boost=1
         	arm_64bit=1
         	# We need this ensure that we're using a 64bit version of raspian which will default to 32bit if we don't specify it.
         	
@@ -76,7 +84,8 @@ Next -  Go to your Command Line, Power Shell or Terminal
         CD into the Boot(I:) and create a new empty file called ssh 
         # This will enable SSH so that we can SSH into the Raspberry Pi the next time it boots up.
         # In CMD you can hit I: enter and then type in "new-item ssh"
-        # In Terminal you can type "touch ssh" to create the new empty file   
+        # In Terminal you can type "touch ssh" to create the new empty file  
+        roottfs folder?? or boot folder?? 
         
 Next -  Remove the SD Card from your USB slot and USB Adapter
 	Put the SD Card in your Pi
@@ -96,53 +105,67 @@ SSH -   In your terminal - the default Pi username is "pi" and the password you 
         Type "yes" and hit Enter
         The system then asks for the password
         You are in!!!
-  
-  Once in I took a moment to update the Raspberry on terminal with the following command:
-  	sudo apt update && sudo apt upgrade
-  	# I'm not sure if this was a mistake or not. If it was I will have to re-image the Pi and start over.
-  	# I will update this file as I progress
-  	
-  Install K3S now by typing in the following command:
-  
-       curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
-       
-       Check out your new Kubernetes cluster using the following command:
-       kubectl get pods -A
-       and VOILA! 
-  
-  Below is TBD for now: Updates coming soon!
-  
         
-# To config your headless Pi you must config using ROOT. In your machine on terminal 
-        Type "sudo su -" without the "'s
+  		# NOTE - IF you had to re-write the SD card and you're implementing the same credentials you used the first time round,
+  		# you will get the error message as follows - - (DON"T FREAK OUT!)
+  		# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ 		# @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+		# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+		# IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+		# Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+		# It is also possible that a host key has just been changed.
+		# The fingerprint for the ECDSA key sent by the remote host is
+ 		# SHA256:qKYt7nxQbTZu4gSjImRBcrxcJ8eix.
+		# Please contact your system administrator.
+		# Add correct host key in /home/username/.ssh/known_hosts to get rid of this message.
+		# Offending ECDSA key in /home/username/.ssh/known_hosts:3
+		#  remove with:
+		#  ssh-keygen -f "/home/username/.ssh/known_hosts" -R "xx.xx.xxx.xx"
+		# ECDSA host key for xx.xx.xxx.xx has changed and you have requested strict checking.
+		# Host key verification failed.
+		
+		
+		# Follow the instructions as follows:
+		# CD to your /.ssh folder (NOTE this is a HIDDEN file as evidenced by the .ssh) and type in to remove
+		# ssh-keygen -f "/home/username/.ssh/known_hosts" -R "xx.xx.xxx.xx"
+		# THEN ssh into your Pi again! 
+
+  
+  
+  To config your headless Pi you must config using ROOT. In your machine on terminal 
+        Type "sudo su -" 
         Hit Enter
-        # You should now see "root@raspberrypi:~# in the command line
-        And with that we then update the iptables.
+        # You should now see "root@raspberrypi:~#" in the command line
+        And with that we can install and then update the iptables.
 
-Updating IP Tables in Terminal. 
-
-Raspberry Pi OS defaults to using nftables instead of iptables.
-K3S networking features require iptables and won't function with nftables. Follow these steps to configure things to use iptables:
-
-	You can copy the following and paste it into your terminal/CMD
-
-sudo iptables -F	
-sudo update-alternatives --set iptables /usr/sbin/iptables-legacy 
-sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-sudo reboot
-
-# You're done configuring your headless Pi! 
+Install IP Tables in Terminal. K3S is going to need the iptables so we need to update them:
 	
+	- sudo apt install iptables
+	
+# Then update them (the -F can be viewed in the manpages for iptables but means 'chain. Delete all rules in chain or all chains'
+	
+	- sudo iptables -F	
+	- sudo update-alternatives --set iptables /usr/sbin/iptables-legacy update-alternatives
+	- sudo update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+
+	Then type "sudo reboot" to reboot your headless Pi machine
+	
+	# You're done configuring your headless Pi!
+	# You also need to ssh back into your Pi AND get Root privileges (sudo su -)
+	  		
 Now it's time to install Kubernetes (K3S) on your headless Pi
 	We need to set up the MASTER first.
 	Launch Terminal
 	ssh into your pi
 	Type ssh pi@10.x.x.x
-	Enter the password (default raspberry for now)
+	Enter your password 
 	Type "sudo su -" to become ROOT
 	Hit Enter
+	
 	As ROOT type in the following command into your terminal
+	
 	"curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" sh -s"
+	
 	Hit ENTER and wait for the download
 	# We are going to download the kubernetes script (get.k3s.io) where the magic is happening
 	# and then we're going to configure the Pi to install Rancher (wait...what????) More on Rancher later - just do this.
@@ -150,6 +173,10 @@ Now it's time to install Kubernetes (K3S) on your headless Pi
 kubectl  CubeKuttle is what we will use a lot to do everything
 Let's verify everything is working type "kubectl get nodes" and hit ENTER
 
+# You should see something like the following! 
 
-    
+	NAME          STATUS   ROLES                  AGE   VERSION
+	raspberrypi   Ready    control-plane,master   43s   v1.24.3+k3s1
+	
+Whoohoo! We've install k3s onto our Raspberry Pi.
     
